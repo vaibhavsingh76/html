@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Attendance Register</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        input {
+            width: 250px;
+        }
+        button {
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #343a40;
+            color: white;
+        }
+        .present {
+            color: green;
+            font-weight: bold;
+        }
+        .absent {
+            color: black;
+            font-weight: bold;
+        }
+        .detained {
+            color: red;
+            font-weight: bold;
+        }
+        .attendance-buttons button {
+            padding: 5px 10px;
+            margin: 5px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <h1>School Attendance Register</h1>
+    <input type="text" id="studentName" placeholder="Enter Student Name">
+    <button onclick="addStudent()">Add Student</button>
+    
+    <h2>Attendance Record</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Total Classes Attended</th>
+                <th>Classes Remaining to Avoid Detention</th>
+                <th>Attendance %</th>
+                <th>Status</th>
+                <th>Mark Attendance</th>
+            </tr>
+        </thead>
+        <tbody id="attendanceList"></tbody>
+    </table>
+    
+    <script>
+        let students = {};
+        const REQUIRED_ATTENDANCE_PERCENTAGE = 70;
+
+        function addStudent() {
+            let name = document.getElementById("studentName").value.trim();
+            if (name === "") {
+                alert("Please enter the student's name");
+                return;
+            }
+            if (!students[name]) {
+                students[name] = { present: 0, absent: 0 };
+                updateTable();
+            } else {
+                alert("Student already exists.");
+            }
+        }
+
+        function markAttendance(name, status) {
+            if (!students[name]) return;
+            if (status === 'Present') {
+                students[name].present++;
+            } else {
+                students[name].absent++;
+            }
+            updateTable();
+        }
+
+        function updateTable() {
+            let table = document.getElementById("attendanceList");
+            table.innerHTML = "";
+            
+            for (let name in students) {
+                let totalClasses = students[name].present + students[name].absent;
+                let attendancePercentage = totalClasses > 0 ? ((students[name].present / totalClasses) * 100).toFixed(2) : 0;
+                let status = attendancePercentage >= REQUIRED_ATTENDANCE_PERCENTAGE ? "Allowed" : "Detained";
+                let statusClass = attendancePercentage >= REQUIRED_ATTENDANCE_PERCENTAGE ? "" : "detained";
+                let requiredClasses = Math.ceil((totalClasses * REQUIRED_ATTENDANCE_PERCENTAGE) / 100);
+                let remainingClasses = Math.max(0, requiredClasses - students[name].present);
+                
+                let row = `<tr>
+                    <td>${name}</td>
+                    <td class="present">${students[name].present}</td>
+                    <td class="absent">${students[name].absent}</td>
+                    <td>${totalClasses}</td>
+                    <td>${remainingClasses}</td>
+                    <td>${attendancePercentage}%</td>
+                    <td class="${statusClass}">${status}</td>
+                    <td class="attendance-buttons">
+                        <button onclick="markAttendance('${name}', 'Present')">✅</button>
+                        <button onclick="markAttendance('${name}', 'Absent')">❌</button>
+                    </td>
+                </tr>`;
+                
+                table.innerHTML += row;
+            }
+        }
+    </script>
+</body>
+</html>
